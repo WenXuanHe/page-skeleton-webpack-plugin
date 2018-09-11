@@ -29,8 +29,8 @@ async function writeShell(routesData, options) {
   return Promise.all(Object.keys(routesData).map(async (route) => {
     const html = routesData[route].html
     const minifiedHtml = htmlMinify(getCleanedShellHtml(html), minOptions)
-    const trimedRoute = route.replace(/\//g, '')
-    const filePath = path.join(pathname, trimedRoute ? `${trimedRoute}.html` : 'index.html')
+    const trimedRoute = route.split(/\//g)[route.split(/\//g).length - 1]
+    const filePath = path.join(pathname, trimedRoute)
     await fse.ensureDir(pathname)
     await promisify(fs.writeFile)(filePath, minifiedHtml, 'utf-8')
     return Promise.resolve()
@@ -112,8 +112,8 @@ const collectImportantComments = (css) => {
 const outputSkeletonScreen = async (originHtml, options, log) => {
   const { pathname, staticDir, routes } = options
   return Promise.all(routes.map(async (route) => {
-    const trimedRoute = route.replace(/\//g, '')
-    const filePath = path.join(pathname, trimedRoute ? `${trimedRoute}.html` : 'index.html')
+    const trimedRoute = route.split(/\//g)[route.split(/\//g).length - 1]
+    const filePath = path.join(pathname, trimedRoute)
     const html = await promisify(fs.readFile)(filePath, 'utf-8')
     const finalHtml = originHtml.replace('<!-- shell -->', html)
     const outputDir = path.join(staticDir, route)

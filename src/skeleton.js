@@ -12,25 +12,29 @@ class Skeleton {
     this.scriptContent = ''
     this.pages = new Set()
     this.log = log
-    this.initialize()
   }
 
+  // 初始化
   // Launch headless Chrome by puppeteer and load script
   async initialize() {
     const { headless } = this.options
     const { log } = this
     try {
-      // load script content from `script` folder
+      // load script content from `script` folder 
       this.scriptContent = await genScriptContent()
+    // console.log("scriptContent", this.scriptContent)
+
       // Launch the browser
       this.browser = await puppeteer.launch({ headless })
+      
     } catch (err) {
-      log(err)
+
+      // log(err)
     }
   }
 
   async newPage() {
-    const { device, debug } = this.options
+    const { device, debug=true } = this.options
     const page = await this.browser.newPage()
     this.pages.add(page)
     await page.emulate(devices[device])
@@ -50,9 +54,13 @@ class Skeleton {
   // Generate the skeleton screen for the specific `page`
   async makeSkeleton(page) {
     const { defer } = this.options
+    // 在headless  chrome页面中加载scriptContent
     await page.addScriptTag({ content: this.scriptContent })
+    // sleep defer秒
     await sleep(defer)
+    // 解析页面
     await page.evaluate((options) => {
+      // 执行this.scriptContent会产生genSkeleton方法， 正式开始skeleton
       Skeleton.genSkeleton(options)
     }, this.options)
   }
@@ -60,16 +68,17 @@ class Skeleton {
   async genHtml(url, route) {
     const stylesheetAstObjects = {}
     const stylesheetContents = {}
-
     const page = await this.newPage()
     const { cookies } = this.options
 
+    // 启用请求拦截
     await page.setRequestInterception(true)
     page.on('request', (request) => {
       if (stylesheetAstObjects[request.url]) {
         // don't need to download the same assets
         request.abort()
       } else {
+        // 如果没被缓存则请求，否则不请求
         request.continue()
       }
     })
@@ -80,9 +89,10 @@ class Skeleton {
       if (response.ok && !response.ok()) {
         throw new Error(`${response.status} on ${requestUrl}`)
       }
-
+      // 拦截请求把css缓存到stylesheetAstObjects， 和stylesheetContents里面
       if (ct.indexOf('text/css') > -1 || /\.css$/i.test(requestUrl)) {
         response.text().then((text) => {
+          // 转换为AST语法树
           const ast = parse(text, {
             parseValue: false,
             parseRulePrelude: false
@@ -96,21 +106,23 @@ class Skeleton {
       throw error
     })
 
-
+    // 设置cookie
     if (cookies.length) {
       await page.setCookie(...cookies.filter(cookie => typeof cookie === 'object'))
     }
 
+    // 开始打开url
     const response = await page.goto(url, { waitUntil: 'networkidle2' })
     if (response && !response.ok()) {
       throw new Error(`${response.status} on ${url}`)
     }
 
-
+    // 开始skeleton
     await this.makeSkeleton(page)
 
+    // 获得styles
     const { styles, cleanedHtml } = await page.evaluate(() => Skeleton.getHtmlAndStyle())
-
+    // styles转换成AST
     const stylesheetAstArray = styles.map((style) => {
       const ast = parse(style, {
         parseValue: false,
@@ -118,11 +130,11 @@ class Skeleton {
       })
       return toPlainObject(ast)
     })
-
+    
     const cleanedCSS = await page.evaluate(async (stylesheetAstObjects, stylesheetAstArray) => { // eslint-disable-line no-shadow
       const DEAD_OBVIOUS = new Set(['*', 'body', 'html'])
       const cleanedStyles = []
-
+      // 是否要清理css
       const checker = (selector) => {
         if (DEAD_OBVIOUS.has(selector)) {
           return true
@@ -238,14 +250,17 @@ class Skeleton {
     return Promise.resolve(result)
   }
 
-  async renderRoutes(origin, routes = this.options.routes) {
-    return Promise.all(routes.map((route) => {
-      const url = `${origin}${route}`
-      return this.genHtml(url, route)
-    }))
+  async renderRoutes(routes = this.options.routes) {
+    return this.initialize().then(() => {
+      return Promise.all(routes.map((route) => {
+        const url = route
+        return this.genHtml(url, route)
+      }))
+    })
   }
 
   async destroy() {
+    console.log("destroy")
     const { log } = this
     if (this.pages.size) {
       const promises = []

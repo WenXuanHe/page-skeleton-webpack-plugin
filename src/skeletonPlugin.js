@@ -3,7 +3,7 @@
 const merge = require('lodash/merge')
 const webpack = require('webpack')
 const optionsSchema = require('./config/optionsSchema.json')
-const Server = require('./server')
+const Server = require('./app')
 const { addScriptTag, outputSkeletonScreen, snakeToCamel } = require('./util')
 const { defaultOptions, staticPath } = require('./config/config')
 const OptionsValidationError = require('./config/optionsValidationError')
