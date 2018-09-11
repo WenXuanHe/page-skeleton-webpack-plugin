@@ -106,7 +106,7 @@ class Server extends EventEmitter {
       for (const { route, html } of skeletonScreens) {
         const fileName = await this.writeMagicHtml(html)
         const skeletonPageUrl = `http://${this.host}:${this.port}/${fileName}`
-        this.log.info(`请打开${skeletonPageUrl}浏览`)
+        this.log.info(`请打开  ${skeletonPageUrl}   浏览`)
         this.routesData[route] = {
           url: route,
           skeletonPageUrl,

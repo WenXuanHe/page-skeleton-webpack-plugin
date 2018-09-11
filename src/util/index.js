@@ -116,8 +116,8 @@ const outputSkeletonScreen = async (originHtml, options, log) => {
     const filePath = path.join(pathname, trimedRoute)
     const html = await promisify(fs.readFile)(filePath, 'utf-8')
     const finalHtml = originHtml.replace('<!-- shell -->', html)
-    const outputDir = path.join(staticDir, route)
-    const outputFile = path.join(outputDir, 'index.html')
+    const outputDir = staticDir
+    const outputFile = path.join(outputDir, trimedRoute)
     await fse.ensureDir(outputDir)
     await promisify(fs.writeFile)(outputFile, finalHtml, 'utf-8')
     log(`write ${outputFile} successfully in ${route}`)

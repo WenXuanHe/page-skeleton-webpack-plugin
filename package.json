@@ -1,7 +1,7 @@
 {
-  "name": "page-skeleton-webpack-plugin",
-  "version": "0.10.12",
-  "description": "web site skeleton generator",
+  "name": "page-skeleton-webpack-plugin-multiple",
+  "version": "0.0.2",
+  "description": "web site skeleton generator multiple",
   "main": "index.js",
   "scripts": {
     "lint": "eslint src client/{index,sockjs,utils}.js",
@@ -16,15 +16,13 @@
     "build:index": "cross-env NODE_ENV=production webpack ./client/index.js -o client/index.bundle.js --color --config client/webpack.config.js",
     "build:sockjs": "webpack ./client/sockjs.js -o client/sockjs.bundle.js --color --config client/webpack.sockjs.config.js",
     "build:preview": "cross-env NODE_ENV=production webpack --color --config preview/webpack.preview.config.js",
-    "build:script": "rollup --config src/script/rollup.config.js",
-    "prepare": "npm run build:index && npm run build:sockjs && npm run build:preview && npm run build:script"
+    "build:script": "rollup --config src/script/rollup.config.js"
   },
   "keywords": [
     "puppeteer",
     "page skeleton",
     "webpack"
   ],
-  "author": "jocs",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",
