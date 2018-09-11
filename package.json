@@ -1,6 +1,6 @@
 {
   "name": "page-skeleton-webpack-plugin-multiple",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "web site skeleton generator multiple",
   "main": "index.js",
   "scripts": {
